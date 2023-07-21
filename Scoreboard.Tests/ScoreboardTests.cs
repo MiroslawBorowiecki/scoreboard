@@ -1,5 +1,3 @@
-using System;
-
 namespace Scoreboard.Tests;
 
 [TestClass]
@@ -131,8 +129,7 @@ public class ScoreboardTests
         scoreboard.StartNewMatch("Mexico", "Canada");
         Guid invalidGuid = Guid.NewGuid();
 
-        // Act
-        
+        // Act        
         void act() => scoreboard.UpdateScore(invalidGuid, 1, 1);
 
         // Assert
@@ -141,6 +138,39 @@ public class ScoreboardTests
             = string.Format(Scoreboard.MatchNotFoundMessageFormat, invalidGuid.ToString());
         StringAssert.Contains(ex.Message, expectedMessage);
     }
+
+    [TestMethod]
+    public void GetSummary_ReturnsUpdatedScoresSortedByScoreSumAndThenByMostRecent()
+    {
+        // Arrange
+        Scoreboard scoreboard = new();
+        List<MatchScore> originalMatches = StartTestMatches(scoreboard).ToList();
+        // Follows the order: Mex - Can, Spa - Bra, Ger - Fra, Uru - Ita, Arg - Aus.
+        (int, int)[] updates = new[] { (0, 5), (10, 2), (2, 2), (6, 6), (3, 1) };
+        for (int i = 0; i < updates.Length; i++)
+        {
+            scoreboard.UpdateScore(originalMatches[i].Id, updates[i].Item1, updates[i].Item2);
+        }
+
+        // Act
+        IEnumerable<MatchScore> results = scoreboard.GetSummary();
+
+        // Assert
+        // The assertion below is IMO best compromise between writing the entire table explicitly
+        // and a more sophisticated approach that would include some loops and logic.
+        var expectedMatches = new MatchScore[]
+        {
+            SetScore(originalMatches[3], updates[3]), // Uru 6 - Ita 6
+            SetScore(originalMatches[1], updates[1]), // Spa 10 - Bra 2
+            SetScore(originalMatches[0], updates[0]), // Mex 0 - Can 5
+            SetScore(originalMatches[4], updates[4]), // Arg 3 - Aus 1
+            SetScore(originalMatches[2], updates[2]) // Ger 2 - Fra 2 
+        };
+        CollectionAssert.AreEqual(expectedMatches, results.ToList());
+    }
+
+    private static MatchScore SetScore(MatchScore original, (int, int) score)
+        => new(original.Id, original.HomeTeam, original.AwayTeam, score.Item1, score.Item2);
 
     private static IEnumerable<MatchScore> StartTestMatches(Scoreboard scoreboard)
     {
