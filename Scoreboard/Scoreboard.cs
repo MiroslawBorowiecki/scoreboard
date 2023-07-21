@@ -1,4 +1,5 @@
-﻿using Scoreboard.Infrastructure;
+﻿using Scoreboard.Domain;
+using Scoreboard.Infrastructure;
 
 namespace Scoreboard;
 
@@ -14,13 +15,10 @@ public class Scoreboard
 
     public MatchScore StartNewMatch(string homeTeam, string awayTeam)
     {
-        if (string.IsNullOrWhiteSpace(homeTeam)) throw new ArgumentException(null, nameof(homeTeam));
-        if (string.IsNullOrWhiteSpace(awayTeam)) throw new ArgumentException(null, nameof(awayTeam));
+        Rules.TeamNameMustContainCharacters(homeTeam, nameof(homeTeam));
+        Rules.TeamNameMustContainCharacters(awayTeam, nameof(awayTeam));
 
-        var conflictingMatch = _matches.CheckForConflictingMatches(homeTeam, awayTeam);
-        if (conflictingMatch != null) throw new ArgumentException(
-            "Cannot start a new match - one of the teams is already playing: " +
-            $"{MatchScoreModel.ToMatchScore(conflictingMatch)}");
+        Rules.TeamsCannotBePlayingAnotherMatch(_matches, homeTeam, awayTeam);
 
         var match = MatchScoreModel.Create(homeTeam, awayTeam);
         _matches.Add(match);
@@ -33,10 +31,9 @@ public class Scoreboard
 
     public void UpdateScore(Guid matchId, int homeScore, int awayScore)
     {
-        if (matchId == Guid.Empty) throw new ArgumentException(null, nameof(matchId));
+        Rules.MatchIdCannotBeEmtpy(matchId);
 
-        if (homeScore < 0) throw new ArgumentOutOfRangeException(nameof(homeScore));
-        if (awayScore < 0) throw new ArgumentOutOfRangeException(nameof(awayScore));
+        Rules.ScoreCannotBeNegative(homeScore, awayScore);
 
         if (!_matches.UpdateScore(matchId, homeScore, awayScore))
             throw new ArgumentException($"{MatchNotFoundMessage}{matchId}");
@@ -44,7 +41,7 @@ public class Scoreboard
 
     public void FinishMatch(Guid matchId)
     {
-        if (matchId == Guid.Empty) throw new ArgumentException(null, nameof(matchId));
+        Rules.MatchIdCannotBeEmtpy(matchId);
 
         if (!_matches.Remove(matchId))
             throw new ArgumentException($"{MatchNotFoundMessage}{matchId}");
