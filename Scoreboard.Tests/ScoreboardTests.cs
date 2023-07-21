@@ -19,4 +19,15 @@ public class ScoreboardTests
             () => scoreboard.StartNewMatch(homeTeam, awayTeam));
         StringAssert.Contains(ex.Message, fieldName);
     }
+
+    [TestMethod]
+    public void StartNewMatch_SetsInitialScore0To0()
+    {
+        Scoreboard scoreboard = new();
+
+        MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
+
+        Assert.AreEqual(0, matchScore.HomeTeamScore);
+        Assert.AreEqual(0, matchScore.AwayTeamScore);
+    }
 }
