@@ -136,8 +136,7 @@ public class ScoreboardTests
 
         // Assert
         var ex = Assert.ThrowsException<ArgumentException>(act);
-        var expectedMessage
-            = string.Format(Scoreboard.MatchNotFoundMessageFormat, invalidGuid.ToString());
+        var expectedMessage = $"{Scoreboard.MatchNotFoundMessage}{invalidGuid}";
         StringAssert.Contains(ex.Message, expectedMessage);
     }
 
@@ -199,8 +198,7 @@ public class ScoreboardTests
 
         // Assert
         var ex = Assert.ThrowsException<ArgumentException>(act);
-        var expectedMessage
-            = string.Format(Scoreboard.MatchNotFoundMessageFormat, invalidGuid.ToString());
+        var expectedMessage = $"{Scoreboard.MatchNotFoundMessage}{invalidGuid}";
         StringAssert.Contains(ex.Message, expectedMessage);
     }
 

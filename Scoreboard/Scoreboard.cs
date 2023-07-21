@@ -4,7 +4,7 @@ namespace Scoreboard;
 
 public class Scoreboard
 {
-    public const string MatchNotFoundMessageFormat = "Match not found. ID: {0};";
+    public const string MatchNotFoundMessage = "Match not found. ID: ";
     private readonly IMatchScoreRepository _scores;
 
     internal Scoreboard(IMatchScoreRepository scores)
@@ -39,15 +39,15 @@ public class Scoreboard
         if (awayScore < 0) throw new ArgumentOutOfRangeException(nameof(awayScore));
 
         if (!_scores.UpdateScore(matchId, homeScore, awayScore))
-            throw new ArgumentException(string.Format(MatchNotFoundMessageFormat, matchId.ToString()));
+            throw new ArgumentException($"{MatchNotFoundMessage}{matchId}");
     }
 
     public void FinishMatch(Guid matchId)
     {
         if (matchId == Guid.Empty) throw new ArgumentException(null, nameof(matchId));
 
-        if (!_scores.Remove(matchId)) throw new ArgumentException(
-            string.Format(MatchNotFoundMessageFormat, matchId.ToString()));
+        if (!_scores.Remove(matchId))
+            throw new ArgumentException($"{MatchNotFoundMessage}{matchId}");
     }
 }
 
