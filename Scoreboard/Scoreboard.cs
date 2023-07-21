@@ -26,7 +26,10 @@ public class Scoreboard
 
     public void UpdateScore(Guid id, int homeScore, int awayScore)
     {
-        throw new ArgumentException(nameof(id));
+        if (id == Guid.Empty) throw new ArgumentException(nameof(id));
+
+        if (homeScore < 0) throw new ArgumentOutOfRangeException(nameof(homeScore));
+        if (awayScore < 0) throw new ArgumentOutOfRangeException(nameof(awayScore));
     }
 }
 

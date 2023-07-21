@@ -1,3 +1,5 @@
+using System;
+
 namespace Scoreboard.Tests;
 
 [TestClass]
@@ -100,6 +102,25 @@ public class ScoreboardTests
         // Assert
         var ex = Assert.ThrowsException<ArgumentException>(act);
         StringAssert.Contains(ex.Message, "id");
+    }
+
+    [TestMethod]
+    public void UpdateScore_Throws_WhenEitherScoreIsNegative()
+    {
+        // Arrange
+        Scoreboard scoreboard = new();
+        MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
+
+        // Act
+        void actHome() => scoreboard.UpdateScore(matchScore.Id, -1, 1);
+        void actAway() => scoreboard.UpdateScore(matchScore.Id, 1, -1);
+
+        // Assert
+        var ex = Assert.ThrowsException<ArgumentOutOfRangeException>(actHome);
+        StringAssert.Contains(ex.Message, "homeScore");
+
+        ex = Assert.ThrowsException<ArgumentOutOfRangeException>(actAway);
+        StringAssert.Contains(ex.Message, "awayScore");
     }
 
     private static IEnumerable<MatchScore> StartTestMatches(Scoreboard scoreboard)
