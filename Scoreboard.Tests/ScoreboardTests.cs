@@ -184,6 +184,24 @@ public class ScoreboardTests
         StringAssert.Contains(ex.Message, "id");
     }
 
+    [TestMethod]
+    public void FinishMatch_Throws_WhenUnableToFindTheMatch()
+    {
+        // Arrange
+        Scoreboard scoreboard = new();
+        scoreboard.StartNewMatch("Mexico", "Canada");
+        Guid invalidGuid = Guid.NewGuid();
+
+        // Act        
+        void act() => scoreboard.FinishMatch(invalidGuid);
+
+        // Assert
+        var ex = Assert.ThrowsException<ArgumentException>(act);
+        var expectedMessage
+            = string.Format(Scoreboard.MatchNotFoundMessageFormat, invalidGuid.ToString());
+        StringAssert.Contains(ex.Message, expectedMessage);
+    }
+
     private static MatchScore SetScore(MatchScore original, (int, int) score)
         => new(original.Id, original.HomeTeam, original.AwayTeam, score.Item1, score.Item2);
 

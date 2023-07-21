@@ -49,6 +49,11 @@ public class Scoreboard
     public void FinishMatch(Guid id)
     {
         if (id == Guid.Empty) throw new ArgumentException(null, nameof(id));
+
+        MatchScoreModel? scoreToRemove = _scores.Find(ms => ms.Id == id);
+
+        if (scoreToRemove == null) throw new ArgumentException(
+            string.Format(MatchNotFoundMessageFormat, id.ToString()));
     }
 }
 
