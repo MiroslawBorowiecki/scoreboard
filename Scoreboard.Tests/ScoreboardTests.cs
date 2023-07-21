@@ -87,6 +87,21 @@ public class ScoreboardTests
         CollectionAssert.AreEqual(originalMatches.Reverse().ToArray(), results.ToArray());
     }
 
+    [TestMethod]
+    public void UpdateScore_Throws_WhenIdIsEmpty()
+    {
+        // Arrange
+        Scoreboard scoreboard = new();
+        MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
+
+        // Act
+        void act() => scoreboard.UpdateScore(Guid.Empty, 1, 1);
+
+        // Assert
+        var ex = Assert.ThrowsException<ArgumentException>(act);
+        StringAssert.Contains(ex.Message, "id");
+    }
+
     private static IEnumerable<MatchScore> StartTestMatches(Scoreboard scoreboard)
     {
         return new[]

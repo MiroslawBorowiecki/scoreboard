@@ -23,6 +23,11 @@ public class Scoreboard
     }
 
     public IEnumerable<MatchScore> GetSummary() => _scores.Reverse<MatchScore>();
+
+    public void UpdateScore(Guid id, int homeScore, int awayScore)
+    {
+        throw new ArgumentException(nameof(id));
+    }
 }
 
 public record MatchScore(
