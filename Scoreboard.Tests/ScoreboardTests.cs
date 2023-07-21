@@ -30,4 +30,18 @@ public class ScoreboardTests
         Assert.AreEqual(0, matchScore.HomeTeamScore);
         Assert.AreEqual(0, matchScore.AwayTeamScore);
     }
+
+    [TestMethod]
+    public void StartNewMatch_ReturnsAUniqueMatchIdForFutureReference()
+    {
+        Scoreboard scoreboard = new();
+
+        MatchScore matchScore1 = scoreboard.StartNewMatch("Mexico", "Canada");
+        MatchScore matchScore2 = scoreboard.StartNewMatch("Spain", "Brazil");
+
+
+        Assert.AreNotEqual(Guid.Empty, matchScore1.Id);
+        Assert.AreNotEqual(Guid.Empty, matchScore2.Id);
+        Assert.AreNotEqual(matchScore1.Id, matchScore2.Id);
+    }
 }
