@@ -45,6 +45,11 @@ public class Scoreboard
         scoreToUpdate.AwayScore = awayScore;
         // Here that's it. With proper persistence it's not that easy...
     }
+
+    public void FinishMatch(Guid id)
+    {
+        if (id == Guid.Empty) throw new ArgumentException(null, nameof(id));
+    }
 }
 
 public record MatchScore(

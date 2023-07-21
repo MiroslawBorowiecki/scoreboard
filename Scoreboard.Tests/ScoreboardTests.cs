@@ -169,6 +169,21 @@ public class ScoreboardTests
         CollectionAssert.AreEqual(expectedMatches, results.ToList());
     }
 
+    [TestMethod]
+    public void FinishMatch_Throws_WhenIdIsEmpty()
+    {
+        // Arrange
+        Scoreboard scoreboard = new();
+        MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
+
+        // Act
+        void act() => scoreboard.FinishMatch(Guid.Empty);
+
+        // Assert
+        var ex = Assert.ThrowsException<ArgumentException>(act);
+        StringAssert.Contains(ex.Message, "id");
+    }
+
     private static MatchScore SetScore(MatchScore original, (int, int) score)
         => new(original.Id, original.HomeTeam, original.AwayTeam, score.Item1, score.Item2);
 
