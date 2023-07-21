@@ -2,6 +2,7 @@
 
 public class Scoreboard
 {
+    public const string MatchNotFoundMessageFormat = "Match not found. ID: {0};";
     private List<MatchScore> _scores = new List<MatchScore>();
 
     public MatchScore StartNewMatch(string homeTeam, string awayTeam)
@@ -30,6 +31,11 @@ public class Scoreboard
 
         if (homeScore < 0) throw new ArgumentOutOfRangeException(nameof(homeScore));
         if (awayScore < 0) throw new ArgumentOutOfRangeException(nameof(awayScore));
+
+        MatchScore? scoreToUpdate = _scores.Find(ms => ms.Id == id);
+
+        if (scoreToUpdate == null) throw new ArgumentException(
+            string.Format(MatchNotFoundMessageFormat, id.ToString()));
     }
 }
 

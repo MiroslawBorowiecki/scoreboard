@@ -123,6 +123,25 @@ public class ScoreboardTests
         StringAssert.Contains(ex.Message, "awayScore");
     }
 
+    [TestMethod]
+    public void UpdateScore_Throws_WhenUnableToFindTheMatch()
+    {
+        // Arrange
+        Scoreboard scoreboard = new();
+        scoreboard.StartNewMatch("Mexico", "Canada");
+        Guid invalidGuid = Guid.NewGuid();
+
+        // Act
+        
+        void act() => scoreboard.UpdateScore(invalidGuid, 1, 1);
+
+        // Assert
+        var ex = Assert.ThrowsException<ArgumentException>(act);
+        var expectedMessage
+            = string.Format(Scoreboard.MatchNotFoundMessageFormat, invalidGuid.ToString());
+        StringAssert.Contains(ex.Message, expectedMessage);
+    }
+
     private static IEnumerable<MatchScore> StartTestMatches(Scoreboard scoreboard)
     {
         return new[]
