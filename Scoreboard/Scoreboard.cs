@@ -26,8 +26,7 @@ public class Scoreboard
     }
 
     public IEnumerable<MatchScore> GetSummary() => 
-        _matches.GetMatchesOrderedByTotalScoreWithRecentFirst()
-        .Select(MatchScoreModel.ToMatchScore);
+        _matches.GetMatchesOrderedByTotalScoreWithRecentFirst();
 
     public void UpdateScore(Guid matchId, int homeScore, int awayScore)
     {

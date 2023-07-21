@@ -18,9 +18,10 @@ internal class InMemoryMatchScoreRepository : IMatchScoreRepository
             || ms.AwayTeam.Equals(homeTeam, StringComparison.OrdinalIgnoreCase));
     }
 
-    public IEnumerable<MatchScoreModel> GetMatchesOrderedByTotalScoreWithRecentFirst() =>
+    public IEnumerable<MatchScore> GetMatchesOrderedByTotalScoreWithRecentFirst() =>
         _scores.Values.OrderByDescending(s => s.HomeScore + s.AwayScore)
-        .ThenByDescending(s => s.Added);
+        .ThenByDescending(s => s.Added)
+        .Select(MatchScoreModel.ToMatchScore);
 
     public bool Remove(Guid matchScoreId) => _scores.Remove(matchScoreId);
 

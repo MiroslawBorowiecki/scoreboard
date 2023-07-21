@@ -20,7 +20,7 @@ internal interface IMatchScoreRepository
     /// Returns all avaiable matches ordered first by their total score, and then more recent first.
     /// </summary>
     /// <returns>Ordered matches.</returns>
-    public IEnumerable<MatchScoreModel> GetMatchesOrderedByTotalScoreWithRecentFirst();
+    public IEnumerable<MatchScore> GetMatchesOrderedByTotalScoreWithRecentFirst();
     
     /// <summary>
     /// Removes the match identified by <paramref name="matchScoreId"/>.
