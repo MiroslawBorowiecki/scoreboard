@@ -14,7 +14,7 @@ public class ScoreboardTests
         string homeTeam, string awayTeam, string fieldName)
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
 
         // Act
         void act() => scoreboard.StartNewMatch(homeTeam, awayTeam);
@@ -28,7 +28,7 @@ public class ScoreboardTests
     public void StartNewMatch_SetsInitialScore0To0()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
 
         // Act
         MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
@@ -42,7 +42,7 @@ public class ScoreboardTests
     public void StartNewMatch_ReturnsAUniqueMatchIdForFutureReference()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
 
         // Act
         MatchScore matchScore1 = scoreboard.StartNewMatch("Mexico", "Canada");
@@ -58,7 +58,7 @@ public class ScoreboardTests
     public void StartNewMatch_Throws_WhenOneOfTheTeamsIsAlreadyPlaying()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
         MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
 
         // Act
@@ -77,7 +77,7 @@ public class ScoreboardTests
     public void GetSummary_ReturnsRecentlyStartedMatchesInReverseOrder()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
         IEnumerable<MatchScore> originalMatches = StartTestMatches(scoreboard);
 
         // Act
@@ -91,7 +91,7 @@ public class ScoreboardTests
     public void UpdateScore_Throws_WhenIdIsEmpty()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
         MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
 
         // Act
@@ -106,7 +106,7 @@ public class ScoreboardTests
     public void UpdateScore_Throws_WhenEitherScoreIsNegative()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
         MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
 
         // Act
@@ -125,7 +125,7 @@ public class ScoreboardTests
     public void UpdateScore_Throws_WhenUnableToFindTheMatch()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
         scoreboard.StartNewMatch("Mexico", "Canada");
         Guid invalidGuid = Guid.NewGuid();
 
@@ -143,7 +143,7 @@ public class ScoreboardTests
     public void GetSummary_ReturnsUpdatedScoresSortedByScoreSumAndThenByMostRecent()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
         List<MatchScore> originalMatches = StartTestMatches(scoreboard).ToList();
         // Follows the order: Mex - Can, Spa - Bra, Ger - Fra, Uru - Ita, Arg - Aus.
         (int, int)[] updates = new[] { (0, 5), (10, 2), (2, 2), (6, 6), (3, 1) };
@@ -173,7 +173,7 @@ public class ScoreboardTests
     public void FinishMatch_Throws_WhenIdIsEmpty()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
         MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
 
         // Act
@@ -188,7 +188,7 @@ public class ScoreboardTests
     public void FinishMatch_Throws_WhenUnableToFindTheMatch()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
         scoreboard.StartNewMatch("Mexico", "Canada");
         Guid invalidGuid = Guid.NewGuid();
 
@@ -206,7 +206,7 @@ public class ScoreboardTests
     public void GetSummary_DoesNotReturnFinishedMatches()
     {
         // Arrange
-        Scoreboard scoreboard = new();
+        Scoreboard scoreboard = SetupScoreboard();
         StartTestMatches(scoreboard).ToList();
         var sortedScores = scoreboard.GetSummary().ToList();
 
@@ -249,4 +249,6 @@ public class ScoreboardTests
             scoreboard.StartNewMatch("Argentina", "Australia")
         };
     }
+
+    private static Scoreboard SetupScoreboard() => new();
 }
