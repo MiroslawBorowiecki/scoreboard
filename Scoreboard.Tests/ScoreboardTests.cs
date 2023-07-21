@@ -202,6 +202,39 @@ public class ScoreboardTests
         StringAssert.Contains(ex.Message, expectedMessage);
     }
 
+    [TestMethod]
+    public void GetSummary_DoesNotReturnFinishedMatches()
+    {
+        // Arrange
+        Scoreboard scoreboard = new();
+        StartTestMatches(scoreboard).ToList();
+        var sortedScores = scoreboard.GetSummary().ToList();
+
+        // Act
+        scoreboard.FinishMatch(sortedScores[2].Id); // Remove in the middle.
+
+        // Assert
+        sortedScores.RemoveAt(2);
+        var updatedScores = scoreboard.GetSummary().ToList();
+        CollectionAssert.AreEqual(sortedScores, updatedScores);
+
+        // Act
+        scoreboard.FinishMatch(sortedScores.Last().Id);
+        
+        // Assert
+        sortedScores.RemoveAt(sortedScores.Count - 1);
+        updatedScores = scoreboard.GetSummary().ToList();
+        CollectionAssert.AreEqual(sortedScores, updatedScores);
+
+        // Act
+        scoreboard.FinishMatch(sortedScores[0].Id);
+
+        // Assert
+        sortedScores.RemoveAt(0);
+        updatedScores = scoreboard.GetSummary().ToList();
+        CollectionAssert.AreEqual(sortedScores, updatedScores);
+    }
+
     private static MatchScore SetScore(MatchScore original, (int, int) score)
         => new(original.Id, original.HomeTeam, original.AwayTeam, score.Item1, score.Item2);
 

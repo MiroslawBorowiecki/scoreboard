@@ -50,10 +50,12 @@ public class Scoreboard
     {
         if (id == Guid.Empty) throw new ArgumentException(null, nameof(id));
 
-        MatchScoreModel? scoreToRemove = _scores.Find(ms => ms.Id == id);
+        int scoreToRemove = _scores.FindIndex(ms => ms.Id == id);
 
-        if (scoreToRemove == null) throw new ArgumentException(
+        if (scoreToRemove == -1) throw new ArgumentException(
             string.Format(MatchNotFoundMessageFormat, id.ToString()));
+
+        _scores.RemoveAt(scoreToRemove);
     }
 }
 
