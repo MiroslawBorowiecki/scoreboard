@@ -44,4 +44,27 @@ public class ScoreboardTests
         Assert.AreNotEqual(Guid.Empty, matchScore2.Id);
         Assert.AreNotEqual(matchScore1.Id, matchScore2.Id);
     }
+
+    [TestMethod]
+    public void GetSummary_ReturnsRecentlyStartedMatchesInReverseOrder()
+    {
+        Scoreboard scoreboard = new();
+        IEnumerable<MatchScore> originalMatches = StartTestMatches(scoreboard);
+
+        IEnumerable<MatchScore> results = scoreboard.GetSummary();
+
+        CollectionAssert.AreEqual(originalMatches.Reverse().ToArray(), results.ToArray());
+    }
+
+    private static IEnumerable<MatchScore> StartTestMatches(Scoreboard scoreboard)
+    {
+        return new[]
+        {
+            scoreboard.StartNewMatch("Mexico", "Canada"),
+            scoreboard.StartNewMatch("Spain", "Brazil"),
+            scoreboard.StartNewMatch("Germany", "France"),
+            scoreboard.StartNewMatch("Uruguay", "Italy"),
+            scoreboard.StartNewMatch("Argentina", "Australia")
+        };
+    }
 }
