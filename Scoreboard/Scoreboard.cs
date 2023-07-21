@@ -1,20 +1,23 @@
-﻿namespace Scoreboard;
+﻿using Scoreboard.Infrastructure;
+
+namespace Scoreboard;
 
 public class Scoreboard
 {
     public const string MatchNotFoundMessageFormat = "Match not found. ID: {0};";
-    private readonly List<MatchScoreModel> _scores = new();
+    private readonly IMatchScoreRepository _scores;
+
+    internal Scoreboard(IMatchScoreRepository scores)
+    {
+        _scores = scores;
+    }
 
     public MatchScore StartNewMatch(string homeTeam, string awayTeam)
     {
         if (string.IsNullOrWhiteSpace(homeTeam)) throw new ArgumentException(null, nameof(homeTeam));
         if (string.IsNullOrWhiteSpace(awayTeam)) throw new ArgumentException(null, nameof(awayTeam));
 
-        var conflictingMatch = _scores.Find(
-            ms => ms.HomeTeam.Equals(homeTeam, StringComparison.OrdinalIgnoreCase)
-            || ms.HomeTeam.Equals(awayTeam, StringComparison.OrdinalIgnoreCase)
-            || ms.AwayTeam.Equals(homeTeam, StringComparison.OrdinalIgnoreCase)
-            || ms.AwayTeam.Equals(homeTeam, StringComparison.OrdinalIgnoreCase));
+        var conflictingMatch = _scores.CheckForConflictingMatches(homeTeam, awayTeam);
         if (conflictingMatch != null) throw new ArgumentException(
             "Cannot start a new match - one of the teams is already playing: " +
             $"{MatchScoreModel.ToMatchScore(conflictingMatch)}");
@@ -24,38 +27,27 @@ public class Scoreboard
         return matchScore;
     }
 
-    public IEnumerable<MatchScore> GetSummary() => _scores
-        .OrderByDescending(s => s.HomeScore + s.AwayScore)
-        .ThenByDescending(s => s.Added)
+    public IEnumerable<MatchScore> GetSummary() => 
+        _scores.GetMatchesOrderedByTotalScoreWithRecentFirst()
         .Select(MatchScoreModel.ToMatchScore);
 
-    public void UpdateScore(Guid id, int homeScore, int awayScore)
+    public void UpdateScore(Guid matchId, int homeScore, int awayScore)
     {
-        if (id == Guid.Empty) throw new ArgumentException(null, nameof(id));
+        if (matchId == Guid.Empty) throw new ArgumentException(null, nameof(matchId));
 
         if (homeScore < 0) throw new ArgumentOutOfRangeException(nameof(homeScore));
         if (awayScore < 0) throw new ArgumentOutOfRangeException(nameof(awayScore));
 
-        MatchScoreModel? scoreToUpdate = _scores.Find(ms => ms.Id == id);
-
-        if (scoreToUpdate == null) throw new ArgumentException(
-            string.Format(MatchNotFoundMessageFormat, id.ToString()));
-
-        scoreToUpdate.HomeScore = homeScore;
-        scoreToUpdate.AwayScore = awayScore;
-        // Here that's it. With proper persistence it's not that easy...
+        if (!_scores.UpdateScore(matchId, homeScore, awayScore))
+            throw new ArgumentException(string.Format(MatchNotFoundMessageFormat, matchId.ToString()));
     }
 
-    public void FinishMatch(Guid id)
+    public void FinishMatch(Guid matchId)
     {
-        if (id == Guid.Empty) throw new ArgumentException(null, nameof(id));
+        if (matchId == Guid.Empty) throw new ArgumentException(null, nameof(matchId));
 
-        int scoreToRemove = _scores.FindIndex(ms => ms.Id == id);
-
-        if (scoreToRemove == -1) throw new ArgumentException(
-            string.Format(MatchNotFoundMessageFormat, id.ToString()));
-
-        _scores.RemoveAt(scoreToRemove);
+        if (!_scores.Remove(matchId)) throw new ArgumentException(
+            string.Format(MatchNotFoundMessageFormat, matchId.ToString()));
     }
 }
 

@@ -1,3 +1,5 @@
+using Scoreboard.Infrastructure;
+
 namespace Scoreboard.Tests;
 
 [TestClass]
@@ -99,7 +101,7 @@ public class ScoreboardTests
 
         // Assert
         var ex = Assert.ThrowsException<ArgumentException>(act);
-        StringAssert.Contains(ex.Message, "id");
+        StringAssert.Contains(ex.Message, "matchId");
     }
 
     [TestMethod]
@@ -181,7 +183,7 @@ public class ScoreboardTests
 
         // Assert
         var ex = Assert.ThrowsException<ArgumentException>(act);
-        StringAssert.Contains(ex.Message, "id");
+        StringAssert.Contains(ex.Message, "matchId");
     }
 
     [TestMethod]
@@ -250,5 +252,5 @@ public class ScoreboardTests
         };
     }
 
-    private static Scoreboard SetupScoreboard() => new();
+    private static Scoreboard SetupScoreboard() => new(new InMemoryMatchScoreRepository());
 }
