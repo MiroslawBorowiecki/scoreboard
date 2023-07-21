@@ -13,20 +13,27 @@ public class ScoreboardTests
     public void StartNewMatch_Throws_WhenHomeOrAwayTeamAreNotProvided(
         string homeTeam, string awayTeam, string fieldName)
     {
+        // Arrange
         Scoreboard scoreboard = new();
 
-        var ex = Assert.ThrowsException<ArgumentException>(
-            () => scoreboard.StartNewMatch(homeTeam, awayTeam));
+        // Act
+        void act() => scoreboard.StartNewMatch(homeTeam, awayTeam);
+
+        //Assert
+        var ex = Assert.ThrowsException<ArgumentException>(act);
         StringAssert.Contains(ex.Message, fieldName);
     }
 
     [TestMethod]
     public void StartNewMatch_SetsInitialScore0To0()
     {
+        // Arrange
         Scoreboard scoreboard = new();
 
+        // Act
         MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
 
+        // Assert
         Assert.AreEqual(0, matchScore.HomeTeamScore);
         Assert.AreEqual(0, matchScore.AwayTeamScore);
     }
@@ -34,11 +41,14 @@ public class ScoreboardTests
     [TestMethod]
     public void StartNewMatch_ReturnsAUniqueMatchIdForFutureReference()
     {
+        // Arrange
         Scoreboard scoreboard = new();
 
+        // Act
         MatchScore matchScore1 = scoreboard.StartNewMatch("Mexico", "Canada");
         MatchScore matchScore2 = scoreboard.StartNewMatch("Spain", "Brazil");
 
+        // Assert
         Assert.AreNotEqual(Guid.Empty, matchScore1.Id);
         Assert.AreNotEqual(Guid.Empty, matchScore2.Id);
         Assert.AreNotEqual(matchScore1.Id, matchScore2.Id);
@@ -47,12 +57,15 @@ public class ScoreboardTests
     [TestMethod]
     public void StartNewMatch_Throws_WhenOneOfTheTeamsIsAlreadyPlaying()
     {
+        // Arrange
         Scoreboard scoreboard = new();
         MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
 
+        // Act
         void actHome() => scoreboard.StartNewMatch("Irrelevant", "Mexico");
         void actAway() => scoreboard.StartNewMatch("Canada", "Irrelevant");
 
+        // Assert
         var ex = Assert.ThrowsException<ArgumentException>(actHome);
         StringAssert.Contains(ex.Message, matchScore.ToString());
 
@@ -63,11 +76,14 @@ public class ScoreboardTests
     [TestMethod]
     public void GetSummary_ReturnsRecentlyStartedMatchesInReverseOrder()
     {
+        // Arrange
         Scoreboard scoreboard = new();
         IEnumerable<MatchScore> originalMatches = StartTestMatches(scoreboard);
 
+        // Act
         IEnumerable<MatchScore> results = scoreboard.GetSummary();
 
+        // Assert
         CollectionAssert.AreEqual(originalMatches.Reverse().ToArray(), results.ToArray());
     }
 
