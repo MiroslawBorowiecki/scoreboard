@@ -5,11 +5,11 @@ namespace Scoreboard;
 public class Scoreboard
 {
     public const string MatchNotFoundMessage = "Match not found. ID: ";
-    private readonly IMatchScoreRepository _scores;
+    private readonly IMatchScoreRepository _matches;
 
-    internal Scoreboard(IMatchScoreRepository scores)
+    internal Scoreboard(IMatchScoreRepository matches)
     {
-        _scores = scores;
+        _matches = matches;
     }
 
     public MatchScore StartNewMatch(string homeTeam, string awayTeam)
@@ -17,18 +17,18 @@ public class Scoreboard
         if (string.IsNullOrWhiteSpace(homeTeam)) throw new ArgumentException(null, nameof(homeTeam));
         if (string.IsNullOrWhiteSpace(awayTeam)) throw new ArgumentException(null, nameof(awayTeam));
 
-        var conflictingMatch = _scores.CheckForConflictingMatches(homeTeam, awayTeam);
+        var conflictingMatch = _matches.CheckForConflictingMatches(homeTeam, awayTeam);
         if (conflictingMatch != null) throw new ArgumentException(
             "Cannot start a new match - one of the teams is already playing: " +
             $"{MatchScoreModel.ToMatchScore(conflictingMatch)}");
 
-        var matchScore = new MatchScore(Guid.NewGuid(), homeTeam, awayTeam, 0, 0);
-        _scores.Add(MatchScoreModel.FromMatchScore(matchScore));
-        return matchScore;
+        var match = MatchScoreModel.Create(homeTeam, awayTeam);
+        _matches.Add(match);
+        return MatchScoreModel.ToMatchScore(match);
     }
 
     public IEnumerable<MatchScore> GetSummary() => 
-        _scores.GetMatchesOrderedByTotalScoreWithRecentFirst()
+        _matches.GetMatchesOrderedByTotalScoreWithRecentFirst()
         .Select(MatchScoreModel.ToMatchScore);
 
     public void UpdateScore(Guid matchId, int homeScore, int awayScore)
@@ -38,7 +38,7 @@ public class Scoreboard
         if (homeScore < 0) throw new ArgumentOutOfRangeException(nameof(homeScore));
         if (awayScore < 0) throw new ArgumentOutOfRangeException(nameof(awayScore));
 
-        if (!_scores.UpdateScore(matchId, homeScore, awayScore))
+        if (!_matches.UpdateScore(matchId, homeScore, awayScore))
             throw new ArgumentException($"{MatchNotFoundMessage}{matchId}");
     }
 
@@ -46,7 +46,7 @@ public class Scoreboard
     {
         if (matchId == Guid.Empty) throw new ArgumentException(null, nameof(matchId));
 
-        if (!_scores.Remove(matchId))
+        if (!_matches.Remove(matchId))
             throw new ArgumentException($"{MatchNotFoundMessage}{matchId}");
     }
 }
@@ -61,6 +61,8 @@ public record MatchScore(
 
 internal class MatchScoreModel
 {
+    protected MatchScoreModel() { }
+
     public Guid Id { get; set; }
     public string HomeTeam { get; set; } = null!;
     public string AwayTeam { get; set; } = null!;
@@ -69,19 +71,16 @@ internal class MatchScoreModel
 
     public DateTime? Added { get; set; }
 
-    public static MatchScoreModel FromMatchScore(MatchScore score)
-    {
-        return new()
-        {
-            Id = score.Id,
-            HomeTeam = score.HomeTeam,
-            AwayTeam = score.AwayTeam,
-            HomeScore = score.HomeTeamScore,
-            AwayScore = score.AwayTeamScore,
-            Added = DateTime.UtcNow
-        };
-    }
-
     public static MatchScore ToMatchScore(MatchScoreModel model)
         => new(model.Id, model.HomeTeam!, model.AwayTeam!, model.HomeScore, model.AwayScore);
+
+    public static MatchScoreModel Create(string homeTeam, string awayTeam) => new()
+    {
+        Id = Guid.NewGuid(),
+        HomeTeam = homeTeam,
+        AwayTeam = awayTeam,
+        HomeScore = 0,
+        AwayScore = 0,
+        Added = DateTime.UtcNow
+    };
 }
