@@ -39,10 +39,25 @@ public class ScoreboardTests
         MatchScore matchScore1 = scoreboard.StartNewMatch("Mexico", "Canada");
         MatchScore matchScore2 = scoreboard.StartNewMatch("Spain", "Brazil");
 
-
         Assert.AreNotEqual(Guid.Empty, matchScore1.Id);
         Assert.AreNotEqual(Guid.Empty, matchScore2.Id);
         Assert.AreNotEqual(matchScore1.Id, matchScore2.Id);
+    }
+
+    [TestMethod]
+    public void StartNewMatch_Throws_WhenOneOfTheTeamsIsAlreadyPlaying()
+    {
+        Scoreboard scoreboard = new();
+        MatchScore matchScore = scoreboard.StartNewMatch("Mexico", "Canada");
+
+        void actHome() => scoreboard.StartNewMatch("Irrelevant", "Mexico");
+        void actAway() => scoreboard.StartNewMatch("Canada", "Irrelevant");
+
+        var ex = Assert.ThrowsException<ArgumentException>(actHome);
+        StringAssert.Contains(ex.Message, matchScore.ToString());
+
+        ex = Assert.ThrowsException<ArgumentException>(actAway);
+        StringAssert.Contains(ex.Message, matchScore.ToString());
     }
 
     [TestMethod]
